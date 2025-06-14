@@ -23,4 +23,7 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Start Cloud SQL Proxy in background and then start Django
-CMD ["sh", "-c", "./cloud_sql_proxy -instances=unified-atom-461804-c9:us-central1:pro-shop-db=tcp:5432 & sleep 10 && python manage.py migrate && gunicorn backend.wsgi:application --bind 0.0.0.0:8000"]
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proshop-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proshop-backend
+  template:
+    metadata:
+      labels:
+        app: proshop-backend
+    spec:
+      containers:
+      - name: backend
+        image: gcr.io/unified-atom-461804-c9/proshop-backend-django:latest
+        env:
+        - name: DB_HOST
+          value: 127.0.0.1
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: your-db-secret
+              key: DB_NAME
+        # other DB_USER, DB_PASSWORD similarly...
+        ports:
+        - containerPort: 8000
+
+      - name: cloud-sql-proxy
+        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
+        args:
+          - "--structured-logs"
+          - "unified-atom-461804-c9:us-central1:pro-shop-db"
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secrets/credentials.json
+        volumeMounts:
+        - name: cloudsql-instance-credentials
+          mountPath: /secrets
+          readOnly: true
+
+      volumes:
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: cloudsql-instance-credentials

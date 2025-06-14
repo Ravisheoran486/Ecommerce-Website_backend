@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: proshop-backend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: proshop-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
