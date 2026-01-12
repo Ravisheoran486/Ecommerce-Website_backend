@@ -1,0 +1,31 @@
+services:
+  cloud-sql-proxy:
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
+    command: 
+      - "--structured-logs"
+      - "unified-atom-461804-c9:us-central1:pro-shop-db"
+      - "--port=5432"
+      - "--address=0.0.0.0"
+    volumes:
+      - /Users/ravisheoran/Desktop/.gcp-credentials/unified-atom-461804-c9-3b55dbae0fe8.json:/config:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/config
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  django:
+    build: .
+    depends_on:
+      - cloud-sql-proxy
+    environment:
+      - DB_HOST=cloud-sql-proxy
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    working_dir: /app
